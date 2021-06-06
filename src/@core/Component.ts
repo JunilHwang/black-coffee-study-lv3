@@ -1,5 +1,4 @@
-import {applyDomDiff, observable, observe} from "./";
-import {selectAll} from "~utils";
+import {observable, observe} from "./";
 
 export abstract class Component<State = {}, Props = {}> {
 
@@ -11,10 +10,7 @@ export abstract class Component<State = {}, Props = {}> {
     protected readonly $target: HTMLElement,
     protected readonly $props: Props = {} as Props,
   ) {
-    this.lifeCycle();
-  }
-  private async lifeCycle() {
-    await this.setup();
+    this.setup();
     this.$state = observable<State>(this.$state!);
     observe(() => this.render());
     this.setEvent();
@@ -27,22 +23,20 @@ export abstract class Component<State = {}, Props = {}> {
   protected abstract template(): string;
   protected setEvent() {}
 
-  protected addEvent(eventType: string, selector: string, callback: (e: Event) => void) {
-    selectAll(selector, this.$target)
-      .forEach(el => {
-        el.removeEventListener(eventType, callback);
-        el.addEventListener(eventType, callback);
-      });
+  protected addEvent (eventType: string, selector: string, callback: Function) {
+    this.$target.addEventListener(eventType, (e) => {
+      const target = e.target as HTMLElement;
+      const currentTarget = e.currentTarget as HTMLElement;
+      const checked = target.closest(selector) || [ ...currentTarget.querySelectorAll(selector) ].includes(target);
+      if (!checked) return;
+      callback(e);
+    })
   }
 
   private render() {
     this.$components = {};
 
-    const $target = this.$target.cloneNode(true) as HTMLElement;
-    $target.innerHTML = this.template();
-
-    applyDomDiff(this.$target, $target);
-
+    this.$target.innerHTML = this.template();
     this.$target.querySelectorAll('[data-component]')
                 .forEach(el => this.setupChildComponent(el));
 
@@ -75,4 +69,5 @@ export abstract class Component<State = {}, Props = {}> {
     }
   }
 
- }
+  public setRoot() { this.isRoot = true; }
+}
