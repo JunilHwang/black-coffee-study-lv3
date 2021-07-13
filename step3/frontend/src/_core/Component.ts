@@ -1,4 +1,4 @@
-import {applyDomDiff, observable, observe} from "./";
+import {applyDomDiff, observable, observe} from "./index";
 import {selectAll} from "@/utils";
 
 interface RegisteredEvent {

@@ -1,5 +1,5 @@
 import {Component} from "@/_core";
-import {router} from "@/router";
+import {router} from "@/router/index";
 import {authStore} from "@/store";
 import * as pages from "@/pages";
 
